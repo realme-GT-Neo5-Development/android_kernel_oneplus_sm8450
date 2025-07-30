@@ -64,8 +64,6 @@
 #endif //RICHTAP_FOR_PMIC_ENABLE
 
 //#ifdef OPLUS_FEATURE_CHG_BASIC
-#undef dev_dbg
-#define dev_dbg dev_err
 //#endif
 /* status register definitions in HAPTICS_CFG module */
 #define HAP_CFG_REVISION2_REG			0x01
