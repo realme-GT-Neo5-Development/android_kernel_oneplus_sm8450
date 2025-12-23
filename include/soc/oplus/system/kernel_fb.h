@@ -1,1 +1,1 @@
-#include <soc/oplus/dft/kernel_fb.h>
+../../../../../sm8450-modules-oplus/oplus/kernel/dft/include/kernel_fb.h
