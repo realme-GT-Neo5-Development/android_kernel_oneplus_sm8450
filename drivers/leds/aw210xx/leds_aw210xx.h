@@ -3,10 +3,7 @@
 
 #define AW210XX_I2C_NAME "aw210xx_led"
 
-#define LED_MAX_NUM							(3)
-#define AW_DEBUG 							(1)
-
-#if AW_DEBUG
+#ifdef AW_DEBUG
 #define AW_LOG(fmt, args...)	pr_info("[%s] %s %d: " fmt, AW210XX_I2C_NAME, \
 		__func__, __LINE__, ##args)
 #else
@@ -313,6 +310,7 @@ typedef enum {
 	BR_RESOLUTION_9_AND_3_BIT,
 } br_pwm_t;
 
+#ifdef AW210XX_DEBUG_FULL
 typedef enum {
 	GROUP_ALL_LED_OFF = 0,
 	AW21018_GROUP_ALL_LEDS_ON,
@@ -331,6 +329,7 @@ typedef enum {
 	AW21009_GROUP_BLUE_LEDS_ON,
 	AW21009_GROUP_BREATH_LEDS_ON,
 } effect_select_t;
+#endif
 
 typedef struct aw210xx_cfg {
 	uint8_t *p;
@@ -342,27 +341,6 @@ enum AW2023_LED_MODE{
 	AW210XX_LED_CCMODE,
 	AW210XX_LED_BLINKMODE,
 	AW210XX_LED_BREATHMODE,
-	AW210XX_LED_MAXMODE,
-};
-	
-enum AW210XX_LED_TYPE {
-	AW210xx_LED_RED = 0,
-	AW210xx_LED_GREEN,
-	AW210xx_LED_BLUE,
-	AW210xx_LED_WHITE,
-	AW210xx_LED_ON,
-	AW210xx_LED_OFF,
-};
-	
-struct aw210xx_platform_data {
-	int imax;
-	const char *led_default_trigger;
-	int led_mode;
-	int rise_time_ms;
-	int hold_time_ms;
-	int fall_time_ms;
-	int off_time_ms;
-	struct aw210xx *led;
 };
 
 /*********************************************************
@@ -374,27 +352,37 @@ struct aw210xx {
 	struct i2c_client *i2c;
 	struct device *dev;
 	struct led_classdev cdev;
-	struct aw210xx_platform_data *pdata;
-	struct work_struct brightness_work;
-	struct work_struct cfg_work;
 	struct mutex lock;
-	int num_leds;
-	int id;
 	uint8_t sdmd_flag;
 	uint8_t rgbmd_flag;
 	br_pwm_t br_res;
 	clk_pwm_t osc_clk;
 	uint8_t chipid;
+#ifdef AW210XX_DEBUG_FULL
 	uint8_t effect;
+#endif
 	int enable_gpio;
 	int vbled_enable_gpio;
-	uint32_t rgbcolor;
 	uint32_t glo_current;
 	uint32_t set_current;
 	unsigned int imax;
-	int rgb_isnk_on;
-	bool led_enable;
-	struct delayed_work   breath_work;
 };
+
+static int global_mode = AW210XX_LED_NONE;  // Init global mode as NONE
+
+// Declare T0-T4 timings
+static u8 T0 = 0;
+static u8 T1 = 0;
+static u8 T2 = 0;
+static u8 T3 = 0;
+
+static const char *aw210xx_mode_names[] = {
+    "none",
+    "cc_mode",
+    "blink_mode",
+    "breath_mode"
+};
+
+#define AW210XX_NUM_MODES ARRAY_SIZE(aw210xx_mode_names)
 
 #endif
